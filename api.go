@@ -66,7 +66,8 @@ func (s *Server) Run() {
 
 	log.Println("Server is currently running on ", s.listenAddr)
 
-	http.ListenAndServe(s.listenAddr, router)
+	log.Fatal(http.ListenAndServe(s.listenAddr, router))
+
 }
 
 func (s *Server) createAccountHandler(w http.ResponseWriter, r *http.Request) error {
@@ -74,6 +75,11 @@ func (s *Server) createAccountHandler(w http.ResponseWriter, r *http.Request) er
 }
 
 func (s *Server) getAccountHandler(w http.ResponseWriter, r *http.Request) error {
+
+	acc := NewAccount("Adam", "Smith")
+
+	renderJSON(w, http.StatusOK, acc)
+
 	return nil
 }
 
