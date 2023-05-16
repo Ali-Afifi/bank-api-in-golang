@@ -18,3 +18,7 @@ func NewAccount(firstName, lastName string) *Account {
 		Number:    rand.Int63n(1000000000),
 	}
 }
+
+func (a *Account) SetID(id int) {
+	a.ID = id
+}
