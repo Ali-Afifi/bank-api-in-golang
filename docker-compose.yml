@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+
+  db:
+    container_name: postgres-db
+    image: postgres:15.3-alpine3.18
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: example
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./database:/var/lib/postgresql/
+    ports:
+      # using the default port (5432) for postgres mapped to port 8081 on the host
+      - 8081:5432
+
+  api-server:
+    container_name: api-server
+    build: .
+    depends_on:
+      - db
+    ports:
+      - 8080:8080
