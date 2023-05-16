@@ -12,13 +12,13 @@ services:
     volumes:
       - ./database:/var/lib/postgresql/
     ports:
-      # using the default port (5432) for postgres mapped to port 8081 on the host
-      - 8081:5432
+      # using the default port (5432) for postgres 
+      - 5432:5432
 
-  api-server:
-    container_name: api-server
-    build: .
-    depends_on:
-      - db
-    ports:
-      - 8080:8080
+  # api-server:
+  #   container_name: api-server
+  #   build: .
+  #   depends_on:
+  #     - db
+  #   ports:
+  #     - 8080:8080
