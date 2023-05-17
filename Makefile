@@ -6,3 +6,9 @@ run:
 
 clean:
 	@rm -rf ./bin
+
+db:
+	docker compose -f database-compose.yml up
+
+compose:
+	docker compose up --build --force-recreate                                                                                    	
