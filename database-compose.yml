@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  db:
+    container_name: postgres-db
+    image: postgres:15.3-alpine3.18
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: example
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./database:/var/lib/postgresql/
+    ports:
+      # using the default port (5432) for postgres
+      - 5432:5432
