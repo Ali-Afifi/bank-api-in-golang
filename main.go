@@ -1,21 +1,22 @@
 package main
 
 import (
-	"fmt"
 	"log"
 )
 
 func main() {
 
-	dataStore, err := NewPostgresStore()
+	postgresDataStore, err := NewPostgresStore()
 
 	if err != nil {
 		log.Fatalf("An error occurred while trying to connect to database: %v\n", err.Error())
 	}
 
-	fmt.Printf("%+v\n", dataStore)
+	if err := postgresDataStore.Init(); err != nil {
+		log.Fatalf("An error occurred while initializing database: %v\n", err.Error())
+	}
 
-	server := NewServer(":8080", dataStore)
+	server := NewServer(":8080", postgresDataStore)
 	server.Run()
 
 }
