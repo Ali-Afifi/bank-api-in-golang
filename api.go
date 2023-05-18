@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -62,23 +63,27 @@ func (s *Server) getAllAccountsHandler(w http.ResponseWriter, r *http.Request) e
 	if err != nil {
 		return nil
 	}
-	
 
 	renderJSON(w, http.StatusOK, accounts)
-	
+
 	return nil
 }
 
 func (s *Server) getAccountHandler(w http.ResponseWriter, r *http.Request) error {
-	id := mux.Vars(r)["id"]
 
-	acc := NewAccount("Adam", "Smith")
+	id, err := getID(r)
 
-	idInt, _ := strconv.Atoi(id)
+	if err != nil {
+		return err
+	}
 
-	acc.SetID(idInt)
+	account, dbErr := s.dataStore.GetAccountByID(id)
 
-	renderJSON(w, http.StatusOK, acc)
+	if dbErr != nil {
+		return dbErr
+	}
+
+	renderJSON(w, http.StatusOK, account)
 
 	return nil
 }
@@ -88,6 +93,19 @@ func (s *Server) updateAccountHandler(w http.ResponseWriter, r *http.Request) er
 }
 
 func (s *Server) deleteAccountHandler(w http.ResponseWriter, r *http.Request) error {
+
+	id, err := getID(r)
+
+	if err != nil {
+		return err
+	}
+
+	if err := s.dataStore.DeleteAccount(id); err != nil {
+		return err
+	}
+
+	renderJSON(w, http.StatusOK, map[string]int{"id": id})
+
 	return nil
 }
 
@@ -96,7 +114,7 @@ type serverFunction func(w http.ResponseWriter, r *http.Request) error
 
 // serverError is the error type used across the server.
 type serverError struct {
-	Error string
+	Error string `json:"error"`
 }
 
 // renderJSON renders 'v' as JSON and writes it as a response into w.
@@ -127,4 +145,16 @@ func makeHTTPHandleFunc(f serverFunction) http.HandlerFunc {
 
 		}
 	}
+}
+
+func getID(r *http.Request) (int, error) {
+	strID := mux.Vars(r)["id"]
+
+	intID, err := strconv.Atoi(strID)
+
+	if err != nil {
+		return intID, fmt.Errorf("id: %s is invalid", strID)
+	}
+
+	return intID, nil
 }
