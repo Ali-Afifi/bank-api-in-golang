@@ -27,9 +27,9 @@ func (s *Server) Run() {
 	router.StrictSlash(true)
 
 	router.HandleFunc("/account/", makeHTTPHandleFunc(s.getAllAccountsHandler)).Methods("GET")
+	router.HandleFunc("/account/", makeHTTPHandleFunc(s.createAccountHandler)).Methods("POST")
 	router.HandleFunc("/account/{id}", makeHTTPHandleFunc(s.getAccountHandler)).Methods("GET")
 	router.HandleFunc("/account/{id}", makeHTTPHandleFunc(s.updateAccountHandler)).Methods("PUT")
-	router.HandleFunc("/account/{id}", makeHTTPHandleFunc(s.createAccountHandler)).Methods("POST")
 	router.HandleFunc("/account/{id}", makeHTTPHandleFunc(s.deleteAccountHandler)).Methods("DELETE")
 
 	log.Println("Server is currently running on ", s.listenAddr)
@@ -39,10 +39,33 @@ func (s *Server) Run() {
 }
 
 func (s *Server) createAccountHandler(w http.ResponseWriter, r *http.Request) error {
+	createAccountRequestBody := CreateAccountRequestBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(&createAccountRequestBody); err != nil {
+		return err
+	}
+
+	account := NewAccount(createAccountRequestBody.FirstName, createAccountRequestBody.LastName)
+
+	if err := s.dataStore.CreateAccount(account); err != nil {
+		return err
+	}
+
+	renderJSON(w, http.StatusOK, account)
+
 	return nil
 }
 
 func (s *Server) getAllAccountsHandler(w http.ResponseWriter, r *http.Request) error {
+	accounts, err := s.dataStore.GetAllAccounts()
+
+	if err != nil {
+		return nil
+	}
+	
+
+	renderJSON(w, http.StatusOK, accounts)
+	
 	return nil
 }
 
