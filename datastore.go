@@ -9,7 +9,7 @@ import (
 )
 
 type DataStore interface {
-	CreateAccount(acc *Account) error
+	CreateAccount(acc *Account) (int, error)
 	DeleteAccount(id int) error
 	UpdateAccount(id int) error
 	GetAllAccounts() ([]*Account, error)
@@ -59,21 +59,30 @@ func (s *PostgresStore) createAccountTable() error {
 
 }
 
-func (s *PostgresStore) CreateAccount(acc *Account) error {
+func (s *PostgresStore) CreateAccount(acc *Account) (int, error) {
 
 	query := `
 	INSERT INTO account (first_name, last_name, number, balance, created_at)
-	VALUES ($1, $2, $3, $4, $5);`
+	VALUES ($1, $2, $3, $4, $5)
+	RETURNING id;`
 
 	rows, err := s.db.Query(query, acc.FirstName, acc.LastName, acc.Number, acc.Balance, acc.CreatedAt)
 
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	log.Printf("%+v\n", rows)
+	for rows.Next() {
 
-	return nil
+		err := rows.Scan(&acc.ID)
+
+		if err != nil {
+			log.Printf("account creation error:%+v", err.Error())
+			return 0, fmt.Errorf("an error occurred will creating account")
+		}
+	}
+
+	return acc.ID, nil
 }
 
 func (s *PostgresStore) DeleteAccount(id int) error {

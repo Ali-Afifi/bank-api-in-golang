@@ -48,8 +48,10 @@ func (s *Server) createAccountHandler(w http.ResponseWriter, r *http.Request) er
 
 	account := NewAccount(createAccountRequestBody.FirstName, createAccountRequestBody.LastName)
 
-	if err := s.dataStore.CreateAccount(account); err != nil {
+	if id, err := s.dataStore.CreateAccount(account); err != nil {
 		return err
+	} else {
+		account.ID = id
 	}
 
 	renderJSON(w, http.StatusOK, account)
