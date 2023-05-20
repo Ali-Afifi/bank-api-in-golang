@@ -1,7 +1,7 @@
 build:
 	@go build -o ./bin/bankserver
 
-run:
+run: build
 	@./bin/bankserver
 
 clean:
