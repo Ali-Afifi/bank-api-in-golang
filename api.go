@@ -33,6 +33,8 @@ func (s *Server) Run() {
 	router.HandleFunc("/account/{id}", makeHTTPHandleFunc(s.updateAccountHandler)).Methods("PUT")
 	router.HandleFunc("/account/{id}", makeHTTPHandleFunc(s.deleteAccountHandler)).Methods("DELETE")
 
+	router.HandleFunc("/transfer/", makeHTTPHandleFunc(s.transferHandler)).Methods("POST")
+
 	log.Println("Server is currently running on ", s.listenAddr)
 
 	log.Fatal(http.ListenAndServe(s.listenAddr, router))
@@ -40,11 +42,13 @@ func (s *Server) Run() {
 }
 
 func (s *Server) createAccountHandler(w http.ResponseWriter, r *http.Request) error {
-	createAccountRequestBody := CreateAccountRequestBody{}
+	createAccountRequestBody := &CreateAccountRequestBody{}
 
-	if err := json.NewDecoder(r.Body).Decode(&createAccountRequestBody); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(createAccountRequestBody); err != nil {
 		return err
 	}
+
+	defer r.Body.Close()
 
 	account := NewAccount(createAccountRequestBody.FirstName, createAccountRequestBody.LastName)
 
@@ -107,6 +111,21 @@ func (s *Server) deleteAccountHandler(w http.ResponseWriter, r *http.Request) er
 	}
 
 	renderJSON(w, http.StatusOK, map[string]int{"id": id})
+
+	return nil
+}
+
+func (s *Server) transferHandler(w http.ResponseWriter, r *http.Request) error {
+
+	transferRequestBody := &TransferRequestBody{}
+
+	if err := json.NewDecoder(r.Body).Decode(transferRequestBody); err != nil {
+		return err
+	}
+
+	defer r.Body.Close()
+
+	renderJSON(w, http.StatusOK, transferRequestBody)
 
 	return nil
 }
