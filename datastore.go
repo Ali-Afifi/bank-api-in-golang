@@ -48,9 +48,10 @@ func (s *PostgresStore) createAccountTable() error {
 		id SERIAL PRIMARY KEY,
 		first_name VARCHAR(255),
 		last_name VARCHAR(255),
-		number SERIAL,
+		number SERIAL NOT NULL,
 		balance INT,
-		created_at TIMESTAMP
+		created_at TIMESTAMP,
+		UNIQUE(number)
 	);`
 
 	_, err := s.db.Exec(query)
